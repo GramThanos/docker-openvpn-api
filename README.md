@@ -205,6 +205,123 @@ of a guarantee in the future.
   * OS X Mavericks with Tunnelblick 3.4beta26 (build 3828) using openvpn-2.3.4
   * ArchLinux OpenVPN pkg 2.3.4-1
 
+## API Usage
+
+WORK IN PROGRESS
+
+### Step 1. Generate configuration
+
+```javascript
+fetch("https://192.168.2.51:8080/api/genconfig", {
+  "headers": {
+    "content-type": "application/json",
+    "Authorization": "Bearer example_web_secret"
+  },
+  "body": JSON.stringify({"host":"udp://protons.ddns.net:1194"}),
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(x => x.text()).then(x => console.log(x));
+```
+
+```JSON
+{"message": "Processing PUSH Config: 'block-outside-dns'\nProcessing Route Config: '192.168.254.0/24'\nProcessing PUSH Config: 'dhcp-option DNS 8.8.8.8'\nProcessing PUSH Config: 'dhcp-option DNS 8.8.4.4'\nProcessing PUSH Config: 'comp-lzo no'\nSuccessfully generated config\nCleaning up before Exit ...\n"}
+```
+
+Thus:
+```
+Processing PUSH Config: 'block-outside-dns'
+Processing Route Config: '192.168.254.0/24'
+Processing PUSH Config: 'dhcp-option DNS 8.8.8.8'
+Processing PUSH Config: 'dhcp-option DNS 8.8.4.4'
+Processing PUSH Config: 'comp-lzo no'
+Successfully generated config
+Cleaning up before Exit ...
+```
+
+### Step 2. Initialise PKI
+
+```javascript
+fetch("https://192.168.2.51:8080/api/initpki", {
+  "headers": {
+    "content-type": "application/json",
+    "Authorization": "Bearer example_web_secret"
+  },
+  "body": JSON.stringify({}),
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(x => x.text()).then(x => console.log(x));
+```
+
+```JSON
+{"message": "\ninit-pki complete; you may now create a CA or requests.\nYour newly created PKI dir is: /etc/openvpn/pki\n\n\nUsing SSL: openssl OpenSSL 1.1.1q  5 Jul 2022\n\n"}
+```
+
+Thus:
+```
+
+init-pki complete; you may now create a CA or requests.
+Your newly created PKI dir is: /etc/openvpn/pki
+
+
+Using SSL: openssl OpenSSL 1.1.1q  5 Jul 2022
+
+
+```
+
+### Step 3. Generate client configuration
+
+
+```javascript
+fetch("https://192.168.2.51:8080/api/genclient", {
+  "headers": {
+    "content-type": "application/json",
+    "Authorization": "Bearer example_web_secret"
+  },
+  "body": JSON.stringify({"client" : "thanos"}),
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(x => x.text()).then(x => console.log(x));
+```
+
+```JSON
+{"message": "Using SSL: openssl OpenSSL 1.1.1q  5 Jul 2022\n\n"}
+```
+
+Thus:
+```
+Using SSL: openssl OpenSSL 1.1.1q  5 Jul 2022
+
+
+```
+
+### Step 4. Load client configuration
+
+
+```javascript
+fetch("https://192.168.2.51:8080/api/getclient", {
+  "headers": {
+    "content-type": "application/json",
+    "Authorization": "Bearer example_web_secret"
+  },
+  "body": JSON.stringify({"client" : "thanos"}),
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(x => x.text()).then(x => console.log(x));
+```
+
+```JSON
+{"message": ""}
+```
+
+Thus:
+```
+
+```
+
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkylemanna%2Fdocker-openvpn.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkylemanna%2Fdocker-openvpn?ref=badge_large)
