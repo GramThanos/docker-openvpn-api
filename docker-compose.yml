@@ -1,28 +1,28 @@
-version: '3.3'
+version: "3.7"
 services:
-	ovpn:
-		ports:
-			- 1194:1194/udp
-			- 8080:8000
-		environment:
-			- WEB_SECRET_TOKEN=example_web_secret
-			- OVPN_ROUTES=
-		cap_add:
-			- NET_ADMIN
-		build:
-			dockerfile: Dockerfile
-		volumes:
-			- data:/etc/openvpn
-		networks:
-			ad_net:
-				ipv4_address: 10.10.0.254
+  vpn:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 1101:1194/udp
+      - 8001:8000
+    environment:
+      - WEB_SECRET_TOKEN=example_web_secret
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - vpn_data:/etc/openvpn
+    networks:
+      my_net:
+        ipv4_address: 10.10.1.2
 volumes:
-	data:
+  vpn_data:
+    name: vpn_data
 networks:
-	ad_net:
-		driver: bridge
-		ipam:
-			driver: default
-			config:
-				- subnet: 10.10.0.0/16
-				  gateway: 10.10.0.1
+  my_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.1.0/24
+          gateway: 10.10.1.1

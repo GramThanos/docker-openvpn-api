@@ -1,0 +1,61 @@
+version: "3.7"
+services:
+  service_team_1:
+    image: "httpd:latest"
+    networks:
+      main_net:
+        ipv4_address: 10.0.1.1
+
+  gateway_team_1:
+    image: "ubuntu:latest"
+    command: [tail, -f, /dev/null]
+    cap_add:
+      - NET_ADMIN
+    networks:
+      main_net:
+        ipv4_address: 10.0.0.254
+      team_1_net:
+        ipv4_address: 10.10.1.1
+
+  vpn_team_1:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 1194:1194/udp
+      - 8080:8000
+    environment:
+      - WEB_SECRET_TOKEN=example_web_secret
+      - OVPN_ROUTES=10.0.0.0 255.0.0.0
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - vpn_data_team_1:/etc/openvpn
+    networks:
+      team_1_net:
+        ipv4_address: 10.10.1.254
+
+volumes:
+  vpn_data_team_1:
+    name: vpn_data_team_1
+  vpn_data_team_2:
+    name: vpn_data_team_2
+networks:
+  main_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+          gateway: 10.0.0.1
+  team_1_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.1.0/24
+          gateway: 10.10.1.1
+  team_2_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.2.0/24
+          gateway: 10.10.2.1
